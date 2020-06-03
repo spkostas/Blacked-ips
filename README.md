@@ -27,3 +27,4 @@ In my case i opened some ports via xampp and placed folder in C:\xampp\htdocs.
 
 Visit localhost on any browser and navigate to demo.
 
+![GitHub Logo](logo.png)
