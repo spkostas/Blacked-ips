@@ -13,6 +13,7 @@ Download and run geojson_gen.ipynb in Jupyter(recommended) or geojson_gen.py .
 Edit last lines path in order to save geojson file in "C:/Users/YourName/supercluster-master/test/fixtures.
 This will be the input value.
 
+In /demo/worker.js edit your path to geojson method to find previous file generated.
 
 In supercluster-master/demo find index.html.
 Map will be shown there in the end.
