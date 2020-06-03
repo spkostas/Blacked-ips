@@ -41,7 +41,7 @@ for file in listf(url, ext1):
         continue
     file = file.replace('/blob','')
     print(file)
-    df = pd.read_csv(file,sep="OFI",index_col=False)
+    df = pd.read_csv(file,sep="fsx",index_col=False)
     for rows in df.iterrows():  
         if '#' not in rows[1][0]:  
             
