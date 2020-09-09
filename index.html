@@ -1,3 +1,15 @@
+<script type="text/javascript">
+    function goToNewPage()
+    {
+        var url = document.getElementById('list').value;
+        if(url != 'none') {
+            window.location = url;
+        }
+        if(url == 'ipip'){
+            console.log('ok');
+        }
+    }
+</script>
 <form>
 <select name="list" id="list" accesskey="target">
     <option value='none' selected>Choose a blocklist</option>
