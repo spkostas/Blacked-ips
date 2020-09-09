@@ -5,5 +5,8 @@
         if(url != 'none') {
             window.location = url;
         }
+        if(url == 'ipip'){
+            console.log('ok');
+        }
     }
 </script>
