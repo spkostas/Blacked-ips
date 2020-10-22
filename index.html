@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+    <script src="new_data.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.0.4/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.0.4/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <div id="map"></div>
+    <script>
+    var map = L.map('map', {zoomControl:true, maxZoom:8, minZoom:0}).setView([0, 0], 2);
+    var basemap = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', subdomains: 'abcd'});
+    basemap.addTo(map);
+    function verify() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+    function popUp(feature, layer) {
+        console.log(feature);
+        var text = '<h2>Location : ' + feature.properties.location + '<br>IP : ' + feature.properties.ip + '</h2><h4><form target="_blank" action=' + feature.properties.source + ' > <input type ="submit"  value ="Go to source" />   </form> <br>  <button onclick="verify()" class="dropbtn">Verify location with: </button><div id="myDropdown" class="dropdown-content"><a href="https://tools.keycdn.com/geo.json?host='+ feature.properties.ip+'">Keycdn Tools</a><a href="https://extreme-ip-lookup.com/'+feature.properties.ip+'">Extreme-Ip-Lookup</a>';
+        layer.bindPopup(text);
+    
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+            }
+        }
+    }
+    }
+    var points = new L.geoJson(data,{
+        onEachFeature: popUp
+    });
+    var markers = L.markerClusterGroup({spiderfyOnMaxZoom: true});
+    markers.addLayer(points).addTo(map);
+    function openPopUp(id, clusterId){
+        map.closePopup(); //which will close all popups
+        map.eachLayer(function(layer){     //iterate over map layer
+            if (layer._leaflet_id == clusterId){         // if layer is markerCluster
+                layer.spiderfy(); //spiederfies our cluster
+            }
+        });
+        map.eachLayer(function(layer){     //iterate over map rather than clusters
+            if (layer._leaflet_id == id){         // if layer is marker
+                layer.openPopup();
+            }
+        });
+    }
+    markers.on('clusterclick', function(a){
+        if(a.layer._zoom == 18){
+            popUpText = '<ul>';
+            //there are many markers inside "a". to be exact: a.layer._childCount much ;-)
+            //let's work with the data:
+            for (feat in a.layer._markers){
+                popUpText+= '<li><u onclick=openPopUp(' + a.layer._markers[feat]._leaflet_id + ','+ a.layer._leaflet_id +')>' + a.layer._markers[feat].feature.properties['name'] + ', ' + a.layer._markers[feat].feature.properties['date'] + '</u></li>';
+            }
+            popUpText += '</ul>';
+            //as we have the content, we should add the popup to the map add the coordinate that is inherent in the cluster:
+            var popup = L.popup().setLatLng([a.layer._cLatLng.lat, a.layer._cLatLng.lng]).setContent(popUpText).openOn(map); 
+        }
+    })
+    </script>
+</body>
