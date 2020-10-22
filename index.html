@@ -27,7 +27,7 @@
         document.getElementById("myDropdown").classList.toggle("show");
     }
     function popUp(feature, layer) {
-        console.log(feature);
+        //console.log(feature);
         var text = '<h2>Location : ' + feature.properties.location + '<br>IP : ' + feature.properties.ip + '</h2><h4><form target="_blank" action=' + feature.properties.source + ' > <input type ="submit"  value ="Go to source" />   </form> <br>  <button onclick="verify()" class="dropbtn">Verify location with: </button><div id="myDropdown" class="dropdown-content"><a href="https://tools.keycdn.com/geo.json?host='+ feature.properties.ip+'">Keycdn Tools</a><a href="https://extreme-ip-lookup.com/'+feature.properties.ip+'">Extreme-Ip-Lookup</a>';
         layer.bindPopup(text);
     
