@@ -1,0 +1,20 @@
+{
+  "name": "blip",
+  "version": "1.0.0",
+  "description": "This is a visualization tool.\u001b[D by Konstadinos Spiridakis.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "geojson": "^0.5.0",
+    "reload": "^3.1.1",
+    "socket.io": "^3.0.4",
+    "supercluster": "^7.1.0",
+    "xmlhttprequest": "^1.8.0"
+  }
+}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Geolocation of blacklisted IP addresses</title>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
+  	<link rel="stylesheet" type="text/css" href="style.css" />
+
+        <style>
+            html, body, #map {
+                height: 100%;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div id="header_mainheader">
+            <h1 id="header_main_title"> <b>BLACK LISTED IP ADDRESSES </b>: GEOLOCATION</h1>
+        </div>
+        <div id="map"></div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+        var map = L.map('map', {zoomControl:true, maxZoom:9, minZoom:0}).setView([0, 0], 2);
+        var basemap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 9
+        }).addTo(map);
+        var socket = io();
+        update();
+        let  btn = document.createElement("BUTTON");
+        var cnt = document.createElement('div');
+        var giwrgis,center,i;
+        var children_t;
+        var markers = L.geoJSON(null, {
+            pointToLayer: createClusterIcon
+            }).addTo(map);
+        map.on('moveend', update);
+        function update(){
+            var bounds = map.getBounds();
+            var bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+            var zoom = map.getZoom();
+            var clusteredMarkers;
+            
+
+            
+            socket.emit('bounds_changed',bbox,zoom,clusteredMarkers);
+            socket.on('bounds_changed', function(bbox,zoom,clusteredMarkers) {  
+                
+                markers.clearLayers();
+                markers.addData(clusteredMarkers);
+            });
+
+            
+            
+        }
+        function verify() {
+                    document.getElementById("myDropdown").classList.toggle("show");
+                }
+        markers.on('click', markerOnClick);
+        function markerOnClick(e) {
+            if(!e){
+                function verify() {
+                    document.getElementById("myDropdown").classList.toggle("show");
+                }
+            }
+            else if (e.layer.feature.properties.cluster_id) {
+
+                //cnt = document.createElement('div');
+                var center = e.latlng;
+                var zoom;
+                //console.log(e.layer);
+                socket.emit('getZoom',e.layer.feature,zoom,center);
+            }else{
+                
+                var text = 'Location : ' + e.layer.feature.properties.location + '<br>IP : ' + e.layer.feature.properties.ip + '<br>Blacklisted by'+' <a target="_blank" href='+e.layer.feature.properties.source+'>'+e.layer.feature.properties.maintainer+'</a><br>'+e.layer.feature.properties.description+  '.</form> <br>  <button onclick="verify()" class="dropbtn">MORE INFO</button><div id="myDropdown" class="dropdown-content"><a target="_blank" href="https://'+ e.layer.feature.properties.alt2+'">Talos Intelligence</a><a target="_blank" href="https://'+e.layer.feature.properties.alt1+'">Extreme-Ip-Lookup</a>';
+                e.layer.bindPopup(text).openPopup();
+                
+            }
+        
+    }
+    cnt.onclick =(e)=> {
+        //cnt = document.createElement('div');
+
+        let feature = JSON.parse(e.target.value);
+        console.log(feature.properties);
+        var center = [feature.properties.lat_x , feature.properties.lat_y];
+
+        var popup = L.popup({className: 'popupCustom',closeOnClick: true })
+        .setLatLng(center);
+        var text = 'Location : ' +feature.properties.location + '<br>IP : ' + feature.properties.ip + '<br>Blacklisted by'+' <a target="_blank" href='+feature.properties.source+'>'+feature.properties.maintainer+'</a><br>'+feature.properties.description+  '.</form> <br>  <button onclick="verify()" class="dropbtn">MORE INFO</button><div id="myDropdown" class="dropdown-content"><a target="_blank" href="https://'+ feature.properties.alt2+'">Talos Intelligence</a><a target="_blank" href="https://'+feature.properties.alt2+'">Extreme-Ip-Lookup</a>';
+            popup.setContent(text);
+            popup.openOn(map);
+        
+
+    }; 
+    
+    socket.on('getZoom', function(feature,zoom,center) {
+            var cluster_size = feature.properties.point_count;
+            if(zoom < 9 ){
+                expansionZoom = zoom;
+                map.flyTo(center,zoom);
+            }else{
+               
+                //cnt = document.createElement('div');
+                var children;
+
+                socket.emit('getChildren',feature,children,center);
+                    
+                }
+
+            });
+            socket.on('getChildren',function(feature,children,center){
+                        var i,text='';
+                        var popup = L.popup({className: 'popupCustom',closeOnClick: true })
+                        .setLatLng(center);
+                        //cnt = document.createElement('div');
+                        cnt.innerHTML = '';
+                        for(i in children){
+                            children[i].properties.lat_y = center.lng;
+                            children[i].properties.lat_x = center.lat;
+                            
+                            btn = document.createElement("BUTTON");
+                            //btn.className = 'buttontext';
+                            btn.value = JSON.stringify(children[i]);
+                            btn.innerHTML = children[i].properties.ip;
+                            
+                            cnt.appendChild(btn);
+                        }
+                        //console.log(cnt.);
+
+                        //console.log(cnt);   
+                        popup.setContent(cnt);
+                        
+                        popup.openOn(map);
+                        });
+                        
+                        
+        
+    
+    
+        function createClusterIcon(feature, latlng) {
+        if (!feature.properties.cluster) return L.marker(latlng);
+
+        var count = feature.properties.point_count;
+        var size =
+            count < 100 ? 'small' :
+            count < 1000 ? 'medium' : 'large';
+        var icon = L.divIcon({ //IP : ' + feature.properties.ip + '<br>Blacklisted by'+' <a target="_blank" href='+feature.properties.source+'>'+feature.properties.maintainer+'</a><br>'+feature.properties.description+  '.</form> <br>  <button onclick="verify()" class="dropbtn">MORE INFO</button><div id="myDropdown" class="dropdown-content"><a target="_blank" href="https://extreme-ip-lookup.com/'+feature.properties.ip+'">Extreme-Ip-Lookup</a>
+            html: '<div><span>' + feature.properties.point_count_abbreviated + '</span></div>',
+            className: 'marker-cluster marker-cluster-' + size,
+            iconSize: L.point(40, 40)
+        });
+
+        return L.marker(latlng, {
+            icon: icon
+        });
+        }
+ /*L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', subdomains: 'abcd'});
+                basemap.addTo(map);
+                L.tileLayer(
+                'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; ' + mapLink + ' Contributors',
+                maxZoom: 18,
+}).addTo(map);*/
+
+        
+
+        </script>
+
+
+
+        
+        
+    </body>
+</html>
