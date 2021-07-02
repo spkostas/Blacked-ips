@@ -5,8 +5,7 @@
 To run, install node.js and run the following in the cloned directory:
 
 ```
-$ npm init
-$ npm run build
+$ npm install
 $ npm run start
 ```
 
