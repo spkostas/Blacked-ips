@@ -10,3 +10,5 @@ $ npm run start
 ```
 
 Once the app is running it can be accessed at http://localhost:8081
+
+To run without geolocation generator script ,change line #3 in worker.js to "your".json file.
