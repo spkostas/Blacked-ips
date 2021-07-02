@@ -1,3 +1,13 @@
-# spkostas.github.io
-Blacklisted Ipsets' locations visualised in map
+# Blacklisted Ipsets' locations on map
 
+## Instructions
+
+To run, install node.js and run the following in the cloned directory:
+
+```
+$ npm init
+$ npm run build
+$ npm run start
+```
+
+Once the app is running it can be accessed at http://localhost:8081
